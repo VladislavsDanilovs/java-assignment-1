@@ -19,6 +19,7 @@ public class TaskEntity {
     private LocalDateTime createdAt;
     private TaskPriority priority;
     private LocalDateTime updatedAt;
+    private Long userId;
 
     public TaskEntity() {
     }
@@ -90,17 +91,25 @@ public class TaskEntity {
         this.createdAt = createdAt;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TaskEntity that = (TaskEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && status == that.status && Objects.equals(createdAt, that.createdAt) && priority == that.priority && Objects.equals(updatedAt, that.updatedAt);
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && status == that.status && Objects.equals(createdAt, that.createdAt) && priority == that.priority && Objects.equals(updatedAt, that.updatedAt) && Objects.equals(userId, that.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, description, status, createdAt, priority, updatedAt);
+        return Objects.hash(id, title, description, status, createdAt, priority, updatedAt, userId);
     }
 
     @Override
@@ -113,6 +122,7 @@ public class TaskEntity {
                 ", createdAt=" + createdAt +
                 ", priority=" + priority +
                 ", updatedAt=" + updatedAt +
+                ", userId=" + userId +
                 '}';
     }
 }
