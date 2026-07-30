@@ -1,6 +1,8 @@
 package com.swisscom.task_manager.controller;
 
-import com.swisscom.task_manager.entity.TaskEntity;
+import com.swisscom.task_manager.model.TaskRequestDTO;
+import com.swisscom.task_manager.model.TaskResponseDTO;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,35 +27,31 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TaskEntity>> getAllTasks() {
+    public ResponseEntity<List<TaskResponseDTO>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TaskEntity> getTaskById(@PathVariable String id) {
-        return taskService.getTaskById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<TaskResponseDTO> getTaskById(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
     @PostMapping
-    public ResponseEntity<TaskEntity> createTask(@RequestBody TaskEntity task) {
-        TaskEntity createdTask = taskService.createTask(task);
-        return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
+    public ResponseEntity<TaskResponseDTO> createTask(@Valid @RequestBody TaskRequestDTO requestDto) {
+        return new ResponseEntity<>(taskService.createTask(requestDto), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskEntity> updateTask(@PathVariable String id, @RequestBody TaskEntity updatedTask) {
-        return taskService.updateTask(id, updatedTask)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<TaskResponseDTO> updateTask(
+            @PathVariable String id,
+            @Valid @RequestBody TaskRequestDTO requestDto
+    ) {
+        return ResponseEntity.ok(taskService.updateTask(id, requestDto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable String id) {
-        if (taskService.deleteTask(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        taskService.deleteTask(id);
+        return ResponseEntity.noContent().build();
     }
 }

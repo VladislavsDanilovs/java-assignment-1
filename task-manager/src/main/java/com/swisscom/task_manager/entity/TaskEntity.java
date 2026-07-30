@@ -17,10 +17,10 @@ public class TaskEntity {
     private String title;
     private String description;
     private TaskStatus status;
-
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime createdAt;
+
+    public TaskEntity() {
+    }
 
     public TaskEntity(String id, String title, String description, TaskStatus status, LocalDateTime createdAt) {
         this.id = id;
