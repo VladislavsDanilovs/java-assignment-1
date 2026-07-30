@@ -1,6 +1,6 @@
-package repository;
+package com.swisscom.task_manager.repository;
 
-import entity.TaskEntity;
+import com.swisscom.task_manager.entity.TaskEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

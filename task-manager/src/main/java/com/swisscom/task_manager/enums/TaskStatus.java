@@ -1,4 +1,4 @@
-package enums;
+package com.swisscom.task_manager.enums;
 
 public enum TaskStatus {
     TODO,

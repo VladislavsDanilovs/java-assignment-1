@@ -1,8 +1,8 @@
-package service;
+package com.swisscom.task_manager.service;
 
-import entity.TaskEntity;
+import com.swisscom.task_manager.entity.TaskEntity;
 import org.springframework.stereotype.Service;
-import repository.TaskRepository;
+import com.swisscom.task_manager.repository.TaskRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,10 +20,7 @@ public class TaskService {
         if (task == null) {
             return null;
         }
-
-        if (task.getCreatedAt() == null) {
-            task.setCreatedAt(LocalDateTime.now());
-        }
+        task.setCreatedAt(LocalDateTime.now());
         return taskRepository.save(task);
     }
 

@@ -1,13 +1,10 @@
-package entity;
+package com.swisscom.task_manager.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import enums.TaskStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.swisscom.task_manager.enums.TaskStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import tools.jackson.databind.annotation.JsonDeserialize;
-import tools.jackson.databind.annotation.JsonSerialize;
-import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
-import tools.jackson.databind.ext.javatime.ser.LocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -20,9 +17,9 @@ public class TaskEntity {
     private String title;
     private String description;
     private TaskStatus status;
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime createdAt;
 
     public TaskEntity(String id, String title, String description, TaskStatus status, LocalDateTime createdAt) {
