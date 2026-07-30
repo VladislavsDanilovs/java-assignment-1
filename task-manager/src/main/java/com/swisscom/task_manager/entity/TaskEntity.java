@@ -1,7 +1,6 @@
 package com.swisscom.task_manager.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.swisscom.task_manager.enums.TaskPriority;
 import com.swisscom.task_manager.enums.TaskStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,16 +17,21 @@ public class TaskEntity {
     private String description;
     private TaskStatus status;
     private LocalDateTime createdAt;
+    private TaskPriority priority;
+    private LocalDateTime updatedAt;
 
     public TaskEntity() {
     }
 
-    public TaskEntity(String id, String title, String description, TaskStatus status, LocalDateTime createdAt) {
+    public TaskEntity(String id, String title, String description, TaskStatus status, LocalDateTime createdAt,
+                      TaskPriority priority, LocalDateTime updatedAt) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
         this.createdAt = createdAt;
+        this.priority = priority;
+        this.updatedAt = updatedAt;
     }
 
     public String getId() {
@@ -62,6 +66,22 @@ public class TaskEntity {
         this.status = status;
     }
 
+    public TaskPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(TaskPriority priority) {
+        this.priority = priority;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -75,12 +95,12 @@ public class TaskEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TaskEntity that = (TaskEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && status == that.status && Objects.equals(createdAt, that.createdAt);
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && status == that.status && Objects.equals(createdAt, that.createdAt) && priority == that.priority && Objects.equals(updatedAt, that.updatedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, description, status, createdAt);
+        return Objects.hash(id, title, description, status, createdAt, priority, updatedAt);
     }
 
     @Override
@@ -91,6 +111,8 @@ public class TaskEntity {
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 ", createdAt=" + createdAt +
+                ", priority=" + priority +
+                ", updatedAt=" + updatedAt +
                 '}';
     }
 }

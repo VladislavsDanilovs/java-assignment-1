@@ -15,6 +15,7 @@ public class TaskMapper {
         entity.setTitle(dto.title());
         entity.setDescription(dto.description());
         entity.setStatus(dto.status());
+        entity.setPriority(dto.priority());
         return entity;
     }
 
@@ -27,7 +28,9 @@ public class TaskMapper {
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getStatus(),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                entity.getUpdatedAt(),
+                entity.getPriority()
         );
     }
 }
