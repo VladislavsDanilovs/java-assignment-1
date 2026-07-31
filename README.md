@@ -59,20 +59,20 @@ mvn spring-boot:run
 The application will launch locally at http://localhost:8080.
 
 ### 3. Key Decisions & Architectural Trade-offs
-1.Dual-Database Approach:
-* Decision: Kept structured, relational user data in PostgreSQL (ACID compliance for user management/auth) and dynamic task data in MongoDB (flexible document schema).
-* Trade-off: Requires managing two separate database connections and handling entity references manually (userId stored as a field in MongoDB documents rather than a hard foreign key constraint).
+**1.Dual-Database Approach:**
+* **Decision:** Kept structured, relational user data in PostgreSQL (ACID compliance for user management/auth) and dynamic task data in MongoDB (flexible document schema).
+* **Trade-off:** Requires managing two separate database connections and handling entity references manually (userId stored as a field in MongoDB documents rather than a hard foreign key constraint).
 
-2.Explicit Timestamps
-* Decision: Set createdAt and updatedAt explicitly inside the service layer rather than relying heavily on annotations (@CreationTimestamp / @PrePersist).
-* Trade-off: Slightly more service-layer code, but guarantees predictable, fully unit-testable business logic.
+**2.Explicit Timestamps**
+* **Decision:** Set createdAt and updatedAt explicitly inside the service layer rather than relying heavily on annotations (@CreationTimestamp / @PrePersist).
+* **Trade-off:** Slightly more service-layer code, but guarantees predictable, fully unit-testable business logic.
 
-3. Standard Spring Data Pagination (`Pageable`):
-   * Decision: Leveraged built-in Spring Data `Page<T>` for filtering and pagination out of the box.
-   * Trade-off: Spring's default `PageImpl` serializes additional metadata into the JSON response (e.g., `pageable`, `sort`, `numberOfElements`), making the payload slightly heavier.
+**3. Standard Spring Data Pagination (`Pageable`):**
+   * **Decision:** Leveraged built-in Spring Data `Page<T>` for filtering and pagination out of the box.
+   * **Trade-off:** Spring's default `PageImpl` serializes additional metadata into the JSON response (e.g., `pageable`, `sort`, `numberOfElements`), making the payload slightly heavier.
 
-Phase 5 Vision (Event-Driven Architecture with Kafka):
-Proposed Architecture: Task Producer (Main API) publishes TaskEvent records (CREATED, UPDATED, DELETED) to Apache Kafka topics. A separate Task Consumer service consumes these events and writes audit logs into a MongoDB task_events collection.
+**Phase 5 Vision (Event-Driven Architecture with Kafka):**
+  * **Proposed Architecture:** Task Producer (Main API) publishes TaskEvent records (CREATED, UPDATED, DELETED) to Apache Kafka topics. A separate Task Consumer service consumes these events and writes audit logs into a MongoDB task_events collection.
 
 ## Future Improvements
 
