@@ -13,20 +13,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
+
     private final TaskService taskService;
 
     public TaskController(TaskService taskService) {
@@ -37,74 +30,45 @@ public class TaskController {
     public ResponseEntity<Page<TaskResponseDTO>> getAllTasks(
             @RequestParam(required = false) TaskStatus status,
             @RequestParam(required = false) TaskPriority priority,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal UserPrincipal currentUser
     ) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        String userEmail;
-        if (principal instanceof UserPrincipal userPrincipal) {
-            userEmail = userPrincipal.email();
-        } else {
-            userEmail = principal.toString();
-        }
-        Page<TaskResponseDTO> tasks = taskService.getTasksForUser(userEmail, status, priority, pageable);
+        Page<TaskResponseDTO> tasks = taskService.getTasksForUser(currentUser.id(), status, priority, pageable);
         return ResponseEntity.ok(tasks);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TaskResponseDTO> getTaskById(@PathVariable String id) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        String userEmail;
-        if (principal instanceof UserPrincipal userPrincipal) {
-            userEmail = userPrincipal.email();
-        } else {
-            userEmail = principal.toString();
-        }
-        return ResponseEntity.ok(taskService.getTaskByIdForUser(id, userEmail));
+    public ResponseEntity<TaskResponseDTO> getTaskById(
+            @PathVariable String id,
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        return ResponseEntity.ok(taskService.getTaskByIdForUser(id, currentUser.id()));
     }
 
     @PostMapping
-    public ResponseEntity<TaskResponseDTO> createTask(@Valid @RequestBody TaskRequestDTO requestDto) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        String userEmail;
-        if (principal instanceof UserPrincipal userPrincipal) {
-            userEmail = userPrincipal.email();
-        } else {
-            userEmail = principal.toString();
-        }
-        TaskResponseDTO createdTask = taskService.createTask(userEmail, requestDto);
+    public ResponseEntity<TaskResponseDTO> createTask(
+            @Valid @RequestBody TaskRequestDTO requestDto,
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        TaskResponseDTO createdTask = taskService.createTask(currentUser.id(), requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponseDTO> updateTask(
             @PathVariable String id,
-            @Valid @RequestBody TaskRequestDTO requestDto
+            @Valid @RequestBody TaskRequestDTO requestDto,
+            @AuthenticationPrincipal UserPrincipal currentUser
     ) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        String userEmail;
-        if (principal instanceof UserPrincipal userPrincipal) {
-            userEmail = userPrincipal.email();
-        } else {
-            userEmail = principal.toString();
-        }
-        return ResponseEntity.ok(taskService.updateTaskForUser(id, userEmail, requestDto));
+        return ResponseEntity.ok(taskService.updateTaskForUser(id, currentUser.id(), requestDto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable String id) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        String userEmail;
-        if (principal instanceof UserPrincipal userPrincipal) {
-            userEmail = userPrincipal.email();
-        } else {
-            userEmail = principal.toString();
-        }
-        taskService.deleteTaskForUser(id, userEmail);
+    public ResponseEntity<Void> deleteTask(
+            @PathVariable String id,
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        taskService.deleteTaskForUser(id, currentUser.id());
         return ResponseEntity.noContent().build();
     }
 }

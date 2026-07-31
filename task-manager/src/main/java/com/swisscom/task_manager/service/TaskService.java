@@ -1,7 +1,6 @@
 package com.swisscom.task_manager.service;
 
 import com.swisscom.task_manager.entity.TaskEntity;
-import com.swisscom.task_manager.entity.UserEntity;
 import com.swisscom.task_manager.enums.TaskPriority;
 import com.swisscom.task_manager.enums.TaskStatus;
 import com.swisscom.task_manager.exception.ResourceNotFoundException;
@@ -9,7 +8,6 @@ import com.swisscom.task_manager.mapper.TaskMapper;
 import com.swisscom.task_manager.model.TaskRequestDTO;
 import com.swisscom.task_manager.model.TaskResponseDTO;
 import com.swisscom.task_manager.repository.TaskRepository;
-import com.swisscom.task_manager.repository.UserRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,26 +17,18 @@ import java.time.LocalDateTime;
 
 @Service
 public class TaskService {
+
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
     private final TaskMapper taskMapper;
 
-    public TaskService(TaskRepository taskRepository, UserRepository userRepository, TaskMapper taskMapper) {
+    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
         this.taskRepository = taskRepository;
-        this.userRepository = userRepository;
         this.taskMapper = taskMapper;
     }
 
-    private UserEntity getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-    }
-
-    public TaskResponseDTO createTask(String userEmail, TaskRequestDTO requestDto) {
-        UserEntity user = getUserByEmail(userEmail);
-
+    public TaskResponseDTO createTask(Long userId, TaskRequestDTO requestDto) {
         TaskEntity entity = taskMapper.toEntity(requestDto);
-        entity.setUserId(user.getId());
+        entity.setUserId(userId);
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
 
@@ -46,11 +36,9 @@ public class TaskService {
         return taskMapper.toDto(savedEntity);
     }
 
-    public Page<TaskResponseDTO> getTasksForUser(String userEmail, TaskStatus status, TaskPriority priority, Pageable pageable) {
-        UserEntity user = getUserByEmail(userEmail);
-
+    public Page<TaskResponseDTO> getTasksForUser(Long userId, TaskStatus status, TaskPriority priority, Pageable pageable) {
         TaskEntity filterTemplate = new TaskEntity();
-        filterTemplate.setUserId(user.getId());
+        filterTemplate.setUserId(userId);
         filterTemplate.setStatus(status);
         filterTemplate.setPriority(priority);
 
@@ -60,28 +48,13 @@ public class TaskService {
                 .map(taskMapper::toDto);
     }
 
-    public TaskResponseDTO getTaskByIdForUser(String id, String userEmail) {
-        UserEntity user = getUserByEmail(userEmail);
-
-        TaskEntity entity = taskRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
-
-        if (!entity.getUserId().equals(user.getId())) {
-            throw new ResourceNotFoundException("Task not found with id: " + id);
-        }
-
+    public TaskResponseDTO getTaskByIdForUser(String id, Long userId) {
+        TaskEntity entity = getTaskEntityAndVerifyOwner(id, userId);
         return taskMapper.toDto(entity);
     }
 
-    public TaskResponseDTO updateTaskForUser(String id, String userEmail, TaskRequestDTO requestDto) {
-        UserEntity user = getUserByEmail(userEmail);
-
-        TaskEntity existingTask = taskRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
-
-        if (!existingTask.getUserId().equals(user.getId())) {
-            throw new ResourceNotFoundException("Task not found with id: " + id);
-        }
+    public TaskResponseDTO updateTaskForUser(String id, Long userId, TaskRequestDTO requestDto) {
+        TaskEntity existingTask = getTaskEntityAndVerifyOwner(id, userId);
 
         existingTask.setTitle(requestDto.title());
         existingTask.setDescription(requestDto.description());
@@ -93,16 +66,19 @@ public class TaskService {
         return taskMapper.toDto(updatedEntity);
     }
 
-    public void deleteTaskForUser(String id, String userEmail) {
-        UserEntity user = getUserByEmail(userEmail);
+    public void deleteTaskForUser(String id, Long userId) {
+        TaskEntity existingTask = getTaskEntityAndVerifyOwner(id, userId);
+        taskRepository.delete(existingTask);
+    }
 
-        TaskEntity existingTask = taskRepository.findById(id)
+    private TaskEntity getTaskEntityAndVerifyOwner(String id, Long userId) {
+        TaskEntity task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
-        if (!existingTask.getUserId().equals(user.getId())) {
+        if (!task.getUserId().equals(userId)) {
             throw new ResourceNotFoundException("Task not found with id: " + id);
         }
 
-        taskRepository.deleteById(id);
+        return task;
     }
 }

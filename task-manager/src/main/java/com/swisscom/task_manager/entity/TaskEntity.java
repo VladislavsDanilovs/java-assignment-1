@@ -25,7 +25,7 @@ public class TaskEntity {
     }
 
     public TaskEntity(String id, String title, String description, TaskStatus status, LocalDateTime createdAt,
-                      TaskPriority priority, LocalDateTime updatedAt) {
+                      TaskPriority priority, LocalDateTime updatedAt, Long userId) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -33,6 +33,7 @@ public class TaskEntity {
         this.createdAt = createdAt;
         this.priority = priority;
         this.updatedAt = updatedAt;
+        this.userId = userId;
     }
 
     public String getId() {
